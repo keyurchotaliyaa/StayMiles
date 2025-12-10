@@ -1,0 +1,88 @@
+.fa-compass{
+    color:rgb(255, 27, 27);
+    font-size: 2rem;
+}
+body{
+ font-family: "Baloo Bhai 2", sans-serif;
+ display: flex;
+ flex-direction: column;
+ min-height: 100vh;
+}
+.container{
+    flex: 1;
+}
+
+.navbar{
+    height: 4rem;
+    background-color:rgb(255, 240, 240);
+}
+.footer{
+    
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    height: 4rem;
+    background-color:rgb(255, 240, 240);
+}
+.link-listing{
+    text-decoration: none;
+}
+.c-rules a{
+    text-decoration: none;
+    color: black;
+}
+.c-rules a:hover{
+    text-decoration:underline;
+}
+.card{
+    border: none !important;
+    margin-bottom: 1rem;
+    
+}
+.review-card{
+    border: 2px solid rgb(143, 143, 143);
+    margin-bottom: 1rem;
+    border-radius: 5px;
+    padding: 7px;
+    
+}
+.card-text{
+    text-decoration: none !important;
+}
+
+.card-img-top{
+    border-radius: 5px;
+    width: 100% !important;
+    object-fit: cover !important;
+    height: 14rem;
+}
+.card-body{
+    padding: 0 !important;
+}
+
+/* card img overlay */
+.card-img-overlay{
+    opacity: 0;
+
+}
+.card-img-overlay:hover{
+    opacity: 0.2;
+    background-color: white;
+}
+
+/* submit btn */
+
+.perent-btn{
+    display: flex;
+    justify-content: center !important;
+     margin-bottom: 2rem;
+    
+}
+
+/* show buttons */
+.show-buttons{
+    display: flex;
+    
+}
+
+

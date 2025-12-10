@@ -1,0 +1,62 @@
+<nav class="navbar border-bottom sticky-top navbar-expand-md bg-body-light">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="/listings"><i class="fa-solid fa-compass"></i></a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup"
+      aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+      <div class="navbar-nav">
+        <!-- <a class="nav-link active" aria-current="page" href="/">Home</a> -->
+        <a class="nav-link" href="/listings">Explore</a>
+
+      </div>
+
+      <div class="search-box navbar-nav ms-auto">
+        <form class="form-inline"  action="/listings/search" method="GET">
+          <input class="search-input form-control mr-sm-2" name="q"  type="search" placeholder="Search" aria-label="Search">
+          <button id="searchbtn" class="search-btn  my-2 my-sm-0" type="submit"> <i class="fa fa-search"></i></button>
+        </form>
+      </div>
+
+
+
+
+      <div class="navbar-nav ms-auto">
+        <a class="nav-link" href="/listings/new">Create Listing</a>
+        <% if(!CurrUser){ %>
+          <a class="nav-link" href="/signup"><b>Sign Up</b></a>
+          <a class="nav-link" href="/login"><b>Log In</b></a>
+          <% } else{ %>
+
+            <a class="nav-link" href="/logout"><b>LogOut</b></a>
+            <% } %>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<style>
+  .search-btn {
+        color: rgb(255, 255, 255);
+        border: none;
+        border-radius: 4rem;
+        background-color: rgb(255, 27, 27);
+        padding: 0.3rem 1rem 0.3rem 1rem ;
+        
+  }
+  .search-btn:hover{
+    color: rgb(255, 209, 209);
+  }
+
+  .search-input {
+     border-radius: 4rem;
+        padding: 0.3rem 1.5rem 0.3rem 1.5rem ;
+        margin-right: 0.3rem;
+  }
+
+  .form-inline {
+    display: flex;
+  }
+</style>
+
