@@ -81,24 +81,6 @@ module.exports.destroyListing = async (req, res) => {
     res.redirect(`/listings/`)
 
 }
-module.exports.searchListing = async (req, res) => {
-    const { q } = req.query;
 
-    if (!q || q.trim() === "") {
-        req.flash("error", "Enter Proper Name of Property.");
-        return res.redirect("/listings");
-    }
-
-    const listing = await Listing.findOne({
-        title: q.trim()
-    });
-
-    if (!listing) {
-        req.flash("error", "Enter Proper Name of Property.");
-        return res.redirect("/listings");
-    }
-
-    return res.redirect(`/listings/${listing._id}`);
-};
 
 

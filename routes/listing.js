@@ -31,7 +31,7 @@ router.get("/", wrapAsync(listingController.index))
 router.get("/new", isLoggedIn, listingController.new)
 
 // search route 
-router.get("/search", wrapAsync(listingController.searchListing));
+// router.get("/search", wrapAsync(listingController.searchListing));
 
 // show route
 router.get("/:id", wrapAsync(listingController.showListing))
