@@ -7,6 +7,7 @@ const Listing = require("../models/listing.js");
 const { isLoggedIn } = require("../middleware.js")
 const listingController = require("../controller/listing.js")
 
+
 // for file upload Multer 
 const multer = require('multer')
 const { storage } = require("../cloudConfig.js");

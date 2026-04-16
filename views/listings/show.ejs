@@ -1,7 +1,162 @@
 <% layout('layouts/boilerplate.ejs') -%>
     <div class="row">
         <div class="col-8 offset-2">
+            <style>
+                .ai-summary-box {
+    border: 1px solid #f5c2c2;
+    background-color: #fff5f5; /* light red */
+    padding: 1.2rem;
+    border-radius: 12px;
+    margin-top: 1.5rem;
+}
 
+.price-box {
+    border: 1px solid #e0e0e0;
+    background-color: #fafafa;
+    padding: 1rem;
+    border-radius: 10px;
+    margin-top: 1rem;
+    width: fit-content;
+}
+
+.price-box p {
+    margin: 4px 0;
+    font-size: 0.95rem;
+}
+
+.total-price {
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+.safety-badge {
+    display: inline-block;
+    padding: 0.5rem 1.2rem;
+    border-radius: 50px; /* capsule shape */
+    font-size: 0.95rem;
+    font-weight: 500;
+    margin-top: 1rem;
+
+    background-color: #e6f4ff;
+    color: #0d6efd;
+    border: 1px solid #b6d4fe;
+}
+
+.nearby-box {
+    margin-top: 1rem;
+    padding: 1rem;
+    border-radius: 12px;
+    background-color: #f8f9fa;
+    border: 1px solid #e0e0e0;
+    width: fit-content;
+}
+
+.nearby-box h5 {
+    margin-bottom: 0.5rem;
+}
+
+.nearby-box p {
+    margin: 4px 0;
+    font-size: 0.95rem;
+}
+
+.price-toggle-btn {
+    margin-top: 8px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 1px solid #ccc;
+    background-color: white;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.price-toggle-btn:hover {
+    background-color: #f5f5f5;
+}
+
+.nearby-container {
+    margin-top: 1.5rem;
+}
+
+.nearby-container h5 {
+    margin-bottom: 1rem;
+}
+
+.nearby-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+}
+
+.nearby-card {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    padding: 10px 12px;
+    border-radius: 12px;
+    background-color: #f8f9fa;
+    border: 1px solid #e0e0e0;
+
+    transition: 0.2s ease;
+}
+
+.nearby-card:hover {
+    transform: translateY(-2px);
+    background-color: #f1f3f5;
+}
+
+.nearby-card:nth-child(1) { background: #fff3cd; } /* Food */
+.nearby-card:nth-child(2) { background: #e7f1ff; } /* Medical */
+.nearby-card:nth-child(3) { background: #e8f5e9; } /* Transport */
+.nearby-card:nth-child(4) { background: #fce4ec; } /* Grocery */
+
+.icon {
+    font-size: 1.5rem;
+}
+
+.title {
+    font-weight: 600;
+    margin: 0;
+}
+
+.desc {
+    font-size: 0.85rem;
+    color: #666;
+    margin: 0;
+}
+
+
+.ai-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 0.8rem;
+}
+
+.ai-header h2 {
+    font-size: 1.4rem;
+    margin: 0;
+}
+
+.ai-badge {
+    background-color: #ff4d4d;
+    color: white;
+    padding: 3px 10px;
+    font-size: 0.75rem;
+    border-radius: 20px;
+}
+
+.ai-points p {
+    margin: 0.4rem 0;
+    font-size: 0.95rem;
+}
+
+.ai-message {
+    font-style: italic;
+    color: #666;
+}
+            </style>
             <body>
                 <h3>
                     <%= listing.title%>
@@ -19,7 +174,29 @@
                         <p>
                             <%= listing.description%>
                         </p>
-                        <p>&#8377; <%= listing.price.toLocaleString("en-IN") %>
+
+                        <p>
+                        &#8377; <%= listing.price.toLocaleString("en-IN") %>
+                        </p>
+
+                        <button class="price-toggle-btn" onclick="togglePrice()">
+                            Price Breakdown ⬇
+                        </button>
+
+                        <div id="priceDetails" class="price-box" style="display: none;">
+
+                            <p>Base Price: ₹ <%= basePrice.toLocaleString("en-IN") %></p>
+                            <p>Taxes (18%): ₹ <%= tax.toLocaleString("en-IN") %></p>
+                            <p>Service Fee: ₹ <%= serviceFee.toLocaleString("en-IN") %></p>
+
+                            <hr>
+
+                            <p class="total-price">
+                                Total: ₹ <%= totalPrice.toLocaleString("en-IN") %>
+                            </p>
+
+                        </div>
+
                         </p>
                         <p>
                             <%= listing.location %>
@@ -46,6 +223,73 @@
                     </div>
                     <% } %>
 
+                    <div class="safety-badge">
+                         🛡️ Safety: <span><%= safetyScore %> / 10</span>
+                    </div>
+
+                    <div class="nearby-container">
+
+                        <h5>📍 NearBy Insights </h5>
+
+                        <div class="nearby-grid">
+
+                            <div class="nearby-card">
+                                <div class="icon">🍔</div>
+                                <div>
+                                    <p class="title">Food</p>
+                                    <p class="desc"><%= nearby.food %></p>
+                                </div>
+                            </div>
+
+                            <div class="nearby-card">
+                                <div class="icon">🏥</div>
+                                <div>
+                                    <p class="title">Medical</p>
+                                    <p class="desc"><%= nearby.medical %></p>
+                                </div>
+                            </div>
+
+                            <div class="nearby-card">
+                                <div class="icon">🚌</div>
+                                <div>
+                                    <p class="title">Transport</p>
+                                    <p class="desc"><%= nearby.transport %></p>
+                                </div>
+                            </div>
+
+                            <div class="nearby-card">
+                                <div class="icon">🛒</div>
+                                <div>
+                                    <p class="title">Grocery</p>
+                                    <p class="desc"><%= nearby.grocery %></p>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="ai-summary-box">
+    
+                    <div class="ai-header">
+                        <span class="ai-badge">New AI Feature</span>
+                        <h2>AI Review Summary</h2>
+                    </div>
+
+                    <% if(aiSummary.message){ %>
+                        <p class="ai-message"><%= aiSummary.message %></p>
+                    <% } else { %>
+                        <div class="ai-points">
+                            <p>❤️ <strong>Guests Love:</strong> <%= aiSummary.guestsLove %></p>
+                            <p>📑 <strong>Complaints:</strong> <%= aiSummary.complaints %></p>
+                            <p>🎯 <strong>Best For:</strong> <%= aiSummary.bestFor %></p>
+                            <p>⭐ <strong>Overall Sentiment:</strong> <%= aiSummary.rating %></p>
+                        </div>
+                    <% } %>
+
+                </div>
+                               
+
                         <hr>
                         <% if(CurrUser){ %>
                             <h4>Put Your Review Here! </h4>
@@ -56,6 +300,7 @@
                                     <input class="form-range" type="range" min="1" max="5" id="rating"
                                         name="review[rating]">
                                 </div> -->
+
                                 <label class="mt-2 mb-3" for="rating">Rating</label>
                                 <fieldset class="starability-slot">
                                     
@@ -72,6 +317,8 @@
                                     <input type="radio" id="first-rate5" name="review[rating]" value="5" />
                                     <label for="first-rate5" title="Amazing">5 stars</label>
                                 </fieldset>
+
+                                
 
 
                                 <div>
@@ -118,6 +365,18 @@
                                             <% } %>
 
                                     </div>
+
+                                    <script>
+                                        function togglePrice() {
+                                            const box = document.getElementById("priceDetails");
+
+                                            if (box.style.display === "none") {
+                                                box.style.display = "block";
+                                            } else {
+                                                box.style.display = "none";
+                                            }
+                                        }
+                                        </script>
             </body>
         </div>
     </div>

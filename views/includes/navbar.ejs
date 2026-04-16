@@ -13,8 +13,14 @@
       </div>
 
       <div class="search-box navbar-nav ms-auto">
-        <form class="form-inline"  action="/listings/search" method="GET">
-          <input class="search-input form-control mr-sm-2" name="q"  type="search" placeholder="Search" aria-label="Search">
+        <form class="form-inline"  action="/listings" method="GET">
+          <input 
+              class="search-input form-control mr-sm-2" 
+              name="search" 
+              value="<%= typeof search !== 'undefined' ? search : '' %>"
+              type="search" 
+              placeholder="Search Property"
+            >
           <button id="searchbtn" class="search-btn  my-2 my-sm-0" type="submit"> <i class="fa fa-search"></i></button>
         </form>
       </div>

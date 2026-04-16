@@ -1,26 +1,95 @@
 const Listing = require("../models/listing.js");
+const getSafetyScore = require("../utils/safetyScore");
+const getNearbyData = require("../utils/nearBy");
 
 module.exports.index = async (req, res) => {
-    const allListings = await Listing.find({});
-    res.render("listings/index.ejs", { allListings })
-}
+    const search = req.query.search?.trim();
+    const filter = req.query.filter;
+
+    let allListings;
+
+    // 🔍 PRIORITY 1 → SEARCH
+    if (search) {
+        allListings = await Listing.find({
+            $or: [
+                { title: { $regex: search, $options: "i" } },
+                { location: { $regex: search, $options: "i" } },
+                { country: { $regex: search, $options: "i" } }
+            ]
+        });
+    }
+
+    // 🎯 PRIORITY 2 → FILTER (random)
+    else if (filter) {
+        allListings = await Listing.aggregate([{ $sample: { size: 4 } }]);
+    }
+
+    // 📦 DEFAULT → ALL
+    else {
+        allListings = await Listing.find({});
+    }
+
+    res.render("listings/index.ejs", { allListings, search });
+};
 
 module.exports.new = (req, res) => {
         res.render("listings/new.ejs")
 }
 
+// module.exports.showListing = async (req, res) => {
+//     let { id } = req.params;
+//     const listing = await Listing.findById(id).populate({path:"reviews",populate: {path:"author"}}).populate("owner");
+    
+    
+//     if (!listing) {
+//         req.flash("error", "Requested Listing Does Not Exist!");
+//         return res.redirect("/listings/");
+//     }
+//     console.log(listing);
+//     res.render("listings/show.ejs", { listing })
+// }
+
+const generateSummary = require("../utils/aiSummary");
+
 module.exports.showListing = async (req, res) => {
     let { id } = req.params;
-    const listing = await Listing.findById(id).populate({path:"reviews",populate: {path:"author"}}).populate("owner");
-    
-    
+
+    const listing = await Listing.findById(id)
+        .populate({ path: "reviews", populate: { path: "author" } })
+        .populate("owner");
+
     if (!listing) {
         req.flash("error", "Requested Listing Does Not Exist!");
         return res.redirect("/listings/");
     }
-    console.log(listing);
-    res.render("listings/show.ejs", { listing })
-}
+
+        // 💰 Price Breakdown Logic
+        const basePrice = listing.price;
+
+        const tax = Math.round(basePrice * 0.18); // 18% GST
+        const serviceFee = 100; // fixed
+
+        const totalPrice = basePrice + tax + serviceFee;
+
+        //nearBy Data
+        const nearby = await getNearbyData(listing.location);
+
+    //safety score
+    const safetyScore = await getSafetyScore(listing.reviews);
+
+    //AI summary
+    const aiSummary = await generateSummary(listing.reviews);
+
+        res.render("listings/show.ejs", {
+        listing,
+        aiSummary,
+        safetyScore,
+        basePrice,
+        tax,
+        serviceFee,
+        totalPrice, nearby
+    });
+};
 
 module.exports.createListing = async (req, res, next) => {
     if (!req.body.listing) {

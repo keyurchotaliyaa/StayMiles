@@ -10,8 +10,6 @@ const review = require("../models/review.js");
 const reviewController = require("../controller/review.js")
 
 
-
-
 // validator function for review 
 const  validateReview = (req,res,next) =>{
 let {error} = ReviewSchema.validate(req.body);

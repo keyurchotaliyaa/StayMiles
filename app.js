@@ -1,152 +1,134 @@
-const express = require("express")
+require("dotenv").config();  
+console.log("FULL ENV:", process.env);
+console.log("MY KEY:", process.env.GEMINI_API_KEY);
+
+const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
-const session = require("express-session")
-const MongoStore = require("connect-mongo")
+const session = require("express-session");
 const Listing = require("./models/listing.js");
-const path = require("path")
-const methodOverride = require("method-override")
-const ejsMate = require("ejs-mate")
-const wrapAsync = require("./utils/wrapAsync.js")
-const expressErr = require("./utils/expressError.js")
-const Review = require("./models/review.js");
+const path = require("path");
+const methodOverride = require("method-override");
+const ejsMate = require("ejs-mate");
+const expressErr = require("./utils/expressError.js");
 const listings = require("./routes/listing.js");
 const reviews = require("./routes/review.js");
 const user = require("./routes/user.js");
 
-const flash = require("connect-flash")
 
+const flash = require("connect-flash");
 
+//  DB URL from .env
+const DB_URL = process.env.MONGO_URL;
 
-const URL = process.env.MONGO_ATLAS;
+//  Passport setup
+const passport = require("passport");
+const LocalStrategy = require("passport-local");
+const User = require("./models/user.js");
 
+//  View engine setup
+app.set("view engine", "ejs");
+app.engine("ejs", ejsMate);
+app.set("views", path.join(__dirname, "views"));
 
-
-// for env
-if (process.env.NODE_ENV != "production") {
-    require('dotenv').config()
-}
-
-
-// for passport 
-const passport = require("passport")
-const LocalStrategy = require("passport-local")
-const User = require("./models/user.js")
-
-app.set("view engine", "ejs")
-app.engine("ejs", ejsMate)
-app.set("views", path.join(__dirname, "views"))
+// Middlewares
 app.use(express.urlencoded({ extended: true }));
-app.use(methodOverride("_method"))
+app.use(methodOverride("_method"));
 app.use(express.static(path.join(__dirname, "/public")));
 
-// Create Mongo store on cloud 
-const store = MongoStore.create({
-    mongoUrl: URL,
-    crypto: {
-        secret: process.env.SECRET
-    },
-    touchAfter: 24 * 3600,  
-})
-
-
-store.on("error", function (e) {
-    console.log("SESSION STORE ERROR ❌", e);
-});
-
-
-// create session
+//  Session (LOCALHOST SIMPLE VERSION)
 const sessionOptions = {
-    store,
-    secret: process.env.SECRET,
+    secret: process.env.SECRET || "mysupersecret",
     resave: false,
     saveUninitialized: true,
-    cookie: {
-        expiers: Date.now() + 7 * 24 * 60 * 60 * 1000,
-        maxAge: 7 * 24 * 60 * 60 * 1000,
-        httpOnly: true,
-    }
-}
+};
 
+app.use(session(sessionOptions));
+app.use(flash());
 
-
-// session & flash
-app.use(session(sessionOptions))
-app.use(flash())
-
-// for passport 
-app.use(passport.initialize())
-app.use(passport.session())
+// Passport middleware
+app.use(passport.initialize());
+app.use(passport.session());
 passport.use(new LocalStrategy(User.authenticate()));
 
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
-
-
-
-main().then(() => {
-    console.log("Connected to DB")
-}).catch((err) => {
-    console.log(err)
-})
+//  Connect DB
 async function main() {
-    await mongoose.connect(URL);
+    await mongoose.connect(DB_URL);
+    console.log("✅ Connected to DB");
 }
+main().catch(err => console.log(err));
 
-
-// locals 
+//  Global locals
 app.use((req, res, next) => {
-    res.locals.success = req.flash("success")
-    res.locals.error = req.flash("error")
+    res.locals.success = req.flash("success");
+    res.locals.error = req.flash("error");
     res.locals.CurrUser = req.user;
-    next()
-})
-// routes
+    next();
+});
+
+// ROUTES
 app.use("/listings", listings);
 app.use("/listings/:id/reviews", reviews);
 app.use("/", user);
 
-// Demo user
+// HOME ROUTE (added to avoid 404 confusion)
+app.get("/", (req, res) => {
+    res.send("App is working 🚀");
+});
+
+//Demo routes
 app.get("/demouser", async (req, res) => {
     let user1 = new User({
         email: "abc@gmail.com",
         username: "keyur@1234"
-    })
+    });
 
-    let user1data = await User.register(user1, "Keyur@1911")
-    res.send(user1data)
-
-})
+    let user1data = await User.register(user1, "Keyur@1911");
+    res.send(user1data);
+});
 
 app.get("/testlisting", async (req, res) => {
     let sampleListing = new Listing({
-        title: "This is First Listing ",
+        title: "This is First Listing",
         description: "Good Good Good",
         price: 1200,
-        location: "pasodra, Surat",
+        location: "Surat",
         country: "India"
-    })
+    });
 
     await sampleListing.save();
-    console.log('Sample was saaved');
-    res.send("Done Beta")
-})
+    res.send("Listing Created ✅");
+});
 
+//Track USer Behaviour
+app.use((req, res, next) => {
+    if (!req.session.userActivity) {
+        req.session.userActivity = {};
+    }
+    next();
+});
+
+// 404 handler
 app.use((req, res, next) => {
     next(new expressErr(404, "Page Not Found!"));
 });
 
+// Error handler
 app.use((err, req, res, next) => {
-    console.log("🔥 REAL ERROR >>>", err);
+    console.log("🔥 ERROR >>>", err);
     const { status = 500, message = "Something went wrong" } = err;
     res.status(status).render("listings/error.ejs", { message, status });
 });
 
-const PORT = process.env.PORT || 8080; 
-app.listen(PORT,
-    () => {
-        console.log("server is listning");
-    })
+
+
+//  Server start
+const PORT = process.env.PORT || 8080;
+app.listen(PORT, () => {
+    console.log(`🚀 Server running on http://localhost:${PORT}`);
+});
 
 
