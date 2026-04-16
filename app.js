@@ -58,8 +58,15 @@ passport.deserializeUser(User.deserializeUser());
 async function main() {
     await mongoose.connect(DB_URL);
     console.log("✅ Connected to DB");
+
+    app.listen(PORT, () => {
+        console.log(`🚀 Server running on port ${PORT}`);
+    });
 }
+
 main().catch(err => console.log(err));
+
+console.log("DB_URL:", DB_URL);
 
 //  Global locals
 app.use((req, res, next) => {
