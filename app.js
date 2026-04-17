@@ -19,7 +19,7 @@ const user = require("./routes/user.js");
 const flash = require("connect-flash");
 
 //  DB URL from .env
-const DB_URL = process.env.MONGO_URL;
+const DB_URL = process.env.ATLASDB_URL;
 
 //  Passport setup
 const passport = require("passport");
@@ -53,6 +53,9 @@ passport.use(new LocalStrategy(User.authenticate()));
 
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
+
+
+const PORT = process.env.PORT || 8080;
 
 //  Connect DB
 async function main() {
@@ -131,11 +134,5 @@ app.use((err, req, res, next) => {
 });
 
 
-
-//  Server start
-const PORT = process.env.PORT || 8080;
-app.listen(PORT, () => {
-    console.log(`🚀 Server running on http://localhost:${PORT}`);
-});
 
 
