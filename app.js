@@ -86,7 +86,7 @@ app.use("/", user);
 
 // HOME ROUTE (added to avoid 404 confusion)
 app.get("/", (req, res) => {
-    res.send("App is working 🚀");
+    res.redirect("/listings");
 });
 
 //Demo routes
